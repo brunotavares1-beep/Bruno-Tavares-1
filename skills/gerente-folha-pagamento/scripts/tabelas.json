@@ -1,0 +1,37 @@
+{
+  "_instrucao": "PREENCHA antes de usar. Nunca invente valores: peca a tabela ao usuario ou consulte fonte oficial e registre data_base e fonte. O script recusa rodar enquanto status != PREENCHIDA.",
+  "status": "PENDENTE_PREENCHIMENTO",
+  "data_base": "",
+  "fonte": "",
+  "salario_minimo": null,
+  "inss_empregado": {
+    "teto_salario_contribuicao": null,
+    "faixas": [
+      {"ate": null, "aliquota": null},
+      {"ate": null, "aliquota": null},
+      {"ate": null, "aliquota": null},
+      {"ate": null, "aliquota": null}
+    ]
+  },
+  "irrf": {
+    "deducao_por_dependente": null,
+    "desconto_simplificado": null,
+    "faixas": [
+      {"ate": null, "aliquota": 0.0, "parcela_deduzir": 0.0},
+      {"ate": null, "aliquota": null, "parcela_deduzir": null},
+      {"ate": null, "aliquota": null, "parcela_deduzir": null},
+      {"ate": null, "aliquota": null, "parcela_deduzir": null},
+      {"ate": null, "aliquota": null, "parcela_deduzir": null}
+    ]
+  },
+  "empresa": {
+    "_instrucao": "Parametros da empresa/obra. RAT por CNAE, FAP publicado, terceiros por FPAS.",
+    "inss_patronal": 0.20,
+    "rat": null,
+    "fap": null,
+    "terceiros": null,
+    "fgts": 0.08,
+    "cprb_ativa": false,
+    "cprb_aliquota": null
+  }
+}
