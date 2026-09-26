@@ -36,17 +36,10 @@ warnings.filterwarnings("ignore")
 CPRB_ALIQUOTA_CHEIA = 0.045  # CPRB cheia s/ receita bruta, construção civil (Lei 12.546/2011)
 FGTS_PCT = 0.08
 
-# RAT: a faixa legal é 1% a 3% por grau de risco do CNAE. Construção civil
-# (CNAE 41 a 43) é grau de risco 3 -> 3%. NÃO use ponto médio da faixa: para
-# esta empresa, 2% subestima o custo patronal em 1 p.p. da base do INSS e
-# contamina toda decisão de preço. O valor real vem do CNAE do estabelecimento
-# e é sobrescrito por --rat.
-RAT_CONSTRUCAO_CIVIL = 0.03
-
-# Terceiros/Sistema S: varia pelo código FPAS do estabelecimento. 5,8% é o
-# valor usual do FPAS 507 (construção civil) e é apenas o ponto de partida —
-# sobrescreva com --terceiros quando a guia da empresa mostrar outro.
-TERCEIROS_PADRAO = 0.058
+# NÃO há valor default de RAT, FAP ou Terceiros neste script, por decisão de
+# projeto: os três dependem do CNAE, do FAP publicado e do FPAS do
+# estabelecimento, e qualquer valor assumido produz custo patronal errado com
+# aparência de certo. Os três são obrigatórios (--rat, --fap, --terceiros).
 
 FAP_MIN, FAP_MAX = 0.5, 2.0
 
@@ -251,8 +244,7 @@ def calcular_media_salarial(resumo):
 # 3) Custo empresa
 # ---------------------------------------------------------------------------
 
-def calcular_custo_empresa(resumo, receita_bruta, fap, ano_cprb, rat, rat_informado,
-                           terceiros, terceiros_informado):
+def calcular_custo_empresa(resumo, receita_bruta, fap, ano_cprb, rat, terceiros):
     ultima_competencia = resumo["_competencia_chave"].max()
     base = resumo[resumo["_competencia_chave"] == ultima_competencia].copy()
     if base.empty:
@@ -330,21 +322,15 @@ def calcular_custo_empresa(resumo, receita_bruta, fap, ano_cprb, rat, rat_inform
         por_funcao[c] = por_funcao[c].round(2)
     por_funcao = por_funcao.sort_values("Custo Total da Função (R$)", ascending=False)
 
-    rotulo_rat = "confirmado (--rat)" if rat_informado else (
-        "PREMISSA: grau de risco 3 da construção civil (CNAE 41 a 43). "
-        "Confirme o RAT do CNAE do estabelecimento")
-    rotulo_terceiros = "confirmado (--terceiros)" if terceiros_informado else (
-        "PREMISSA: usual do FPAS 507. Confirme na guia da empresa")
-
     premissas = [
         f"Competência de referência: {ultima_competencia}",
         f"Ano usado para o cronograma de desoneração: {ano_cprb}",
         (f"CPP sobre a folha: {cpp_pct_folha:.0%} | CPRB aplicável: {pct_cprb_aplicavel:.0%} da "
          f"alíquota cheia de {CPRB_ALIQUOTA_CHEIA:.1%} sobre a receita bruta "
          f"(construção civil, Lei 12.546/2011)"),
-        f"RAT usado: {rat:.2%} — {rotulo_rat}",
-        f"FAP usado: {fap} — {'confirmado (--fap)' if fap != 1.0 else 'PREMISSA: 1,0 (neutro). Informe o FAP publicado da empresa'}",
-        f"Terceiros/Sistema S: {terceiros:.2%} — {rotulo_terceiros}",
+        f"RAT informado pelo usuário: {rat:.2%} (do CNAE do estabelecimento)",
+        f"FAP informado pelo usuário: {fap} (publicado pelo INSS/MTE para o CNPJ)",
+        f"Terceiros/Sistema S informado pelo usuário: {terceiros:.2%} (do FPAS)",
         ("FGTS: usado o valor já apurado no holerite (coluna 'FGTS do Mês') quando disponível; "
          "senão, 8% sobre a Base Cálc. FGTS"),
         ("Provisão de multa rescisória (40% do FGTS + aviso prévio + férias/13º proporcionais) "
@@ -355,12 +341,6 @@ def calcular_custo_empresa(resumo, receita_bruta, fap, ano_cprb, rat, rat_inform
     ]
     if aviso_schedule:
         premissas.append(f"AVISO: {aviso_schedule}")
-    if not rat_informado or fap == 1.0 or not terceiros_informado:
-        premissas.append(
-            "ATENÇÃO: o custo empresa acima contém premissa de encargo não confirmada. "
-            "Não use este número para decisão de preço de venda, orçamento ou corte de "
-            "quadro antes de confirmar RAT, FAP e Terceiros com a guia e o FAP publicado."
-        )
 
     return resumo_empresa, por_funcao, premissas
 
@@ -401,27 +381,25 @@ def main():
     ap.add_argument("--output", required=True, help="Excel de auditoria a ser gerado.")
     ap.add_argument("--receita-bruta", type=float, default=None,
                     help="Receita bruta do período, para calcular a CPRB em R$ (opcional).")
-    ap.add_argument("--fap", type=float, default=1.0,
-                    help=f"Fator Acidentário de Prevenção, entre {FAP_MIN} e {FAP_MAX} "
-                         "(padrão 1.0 = premissa neutra).")
-    ap.add_argument("--rat", type=float, default=None,
-                    help="RAT em decimal (0.01, 0.02 ou 0.03). Padrão: 0.03, grau de risco 3 "
-                         "da construção civil (CNAE 41 a 43).")
-    ap.add_argument("--terceiros", type=float, default=None,
-                    help="Terceiros/Sistema S em decimal. Padrão: 0.058 (usual do FPAS 507).")
+    ap.add_argument("--rat", type=float, required=True,
+                    help=f"OBRIGATÓRIO. RAT em decimal do CNAE do estabelecimento "
+                         f"(0.01, 0.02 ou 0.03). Sem default por decisão de projeto.")
+    ap.add_argument("--fap", type=float, required=True,
+                    help=f"OBRIGATÓRIO. FAP publicado pelo INSS/MTE para o CNPJ, entre "
+                         f"{FAP_MIN} e {FAP_MAX}. Sem default por decisão de projeto.")
+    ap.add_argument("--terceiros", type=float, required=True,
+                    help="OBRIGATÓRIO. Terceiros/Sistema S em decimal, conforme o FPAS do "
+                         "estabelecimento. Sem default por decisão de projeto.")
     ap.add_argument("--ano-cprb", type=int, default=None,
                     help="Ano do cronograma de desoneração (padrão: ano da última competência).")
     args = ap.parse_args()
 
     if not FAP_MIN <= args.fap <= FAP_MAX:
         sys.exit(f"[erro] FAP {args.fap} fora da faixa legal {FAP_MIN} a {FAP_MAX}.")
-    if args.rat is not None and not 0.01 <= args.rat <= 0.03:
+    if not 0.01 <= args.rat <= 0.03:
         sys.exit(f"[erro] RAT {args.rat} fora da faixa legal 0.01 a 0.03.")
-
-    rat_informado = args.rat is not None
-    rat = args.rat if rat_informado else RAT_CONSTRUCAO_CIVIL
-    terceiros_informado = args.terceiros is not None
-    terceiros = args.terceiros if terceiros_informado else TERCEIROS_PADRAO
+    if not 0 < args.terceiros < 0.15:
+        sys.exit(f"[erro] Terceiros {args.terceiros} implausível. Confira o FPAS.")
 
     resumo, rubricas = carregar_base(args.input)
 
@@ -434,16 +412,12 @@ def main():
     df_atipicas = calcular_rubricas_atipicas(resumo, rubricas)
     df_media_salarial = calcular_media_salarial(resumo)
     resumo_empresa, df_por_funcao, premissas = calcular_custo_empresa(
-        resumo, args.receita_bruta, args.fap, ano_cprb,
-        rat, rat_informado, terceiros, terceiros_informado)
+        resumo, args.receita_bruta, args.fap, ano_cprb, args.rat, args.terceiros)
 
     n_atipicas = int((df_atipicas["Atípico"] == "Sim").sum()) if not df_atipicas.empty else 0
     print(f"[info] {n_atipicas} combinação(ões) função+rubrica sinalizada(s) como atípica.")
     print(f"[info] Custo total (folha + encargos): "
           f"R$ {resumo_empresa['Custo Total Folha + Encargos (R$)']:,.2f}")
-    if not rat_informado:
-        print("[aviso] RAT não informado: usando 3% (grau de risco 3, construção civil). "
-              "Confirme o CNAE do estabelecimento.")
 
     wb = Workbook()
     wb.remove(wb.active)

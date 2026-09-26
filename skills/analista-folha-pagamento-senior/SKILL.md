@@ -50,14 +50,13 @@ Esperado: o `.xlsx` de `consolidar-holerites-aw` (abas `Resumo`, `Rubricas`, `Di
 python3 scripts/analisar_folha.py \
   --input  "base_holerites_AW.xlsx" \
   --output "Auditoria_Folha_<competencia>.xlsx" \
-  [--receita-bruta 850000] \
-  [--rat 0.03] [--fap 1.15] [--terceiros 0.058] \
-  [--ano-cprb 2026]
+  --rat 0.03 --fap 1.15 --terceiros 0.058 \
+  [--receita-bruta 850000] [--ano-cprb 2026]
 ```
 
-Pergunte ao usuário, de uma vez, os quatro parâmetros que mudam o custo: **RAT** (pelo CNAE do estabelecimento), **FAP publicado**, **Terceiros** (pelo FPAS da guia) e **receita bruta**. Sem eles o script roda, mas marca cada um como `PREMISSA` na aba `Premissas` e emite alerta de bloqueio — nesse caso o número **não serve** para decisão de preço, orçamento ou corte de quadro, e você precisa dizer isso.
+`--rat`, `--fap` e `--terceiros` são **obrigatórios** e não têm valor default: o script recusa rodar sem os três. Isso é deliberado — encargo assumido gera custo errado com aparência de certo.
 
-Padrão do RAT é 3% (grau de risco 3 da construção civil). Não é o ponto médio da faixa: 2% subestimaria o custo em 1 ponto percentual da base do INSS.
+Pergunte os quatro de uma vez, em lista numerada: **RAT** (do CNAE do estabelecimento), **FAP publicado** (INSS/MTE, por CNPJ), **Terceiros** (do FPAS da guia) e **receita bruta** (opcional, só para a CPRB em R$). Não sugira valor "típico" para nenhum dos três — peça o dado.
 
 ### 3. Interpretar — carregue só a referência que a pergunta exige
 

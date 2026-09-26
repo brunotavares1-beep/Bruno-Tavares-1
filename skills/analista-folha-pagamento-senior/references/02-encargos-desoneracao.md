@@ -30,7 +30,7 @@ A desoneração substitui **apenas** a CPP. Continuam devidos integralmente:
 | Encargo | Alíquota | Observação |
 |---|---|---|
 | FGTS | 8% mensal | + multa rescisória de 40% em dispensa sem justa causa |
-| RAT/SAT | 1%, 2% ou 3% por grau de risco do CNAE | **Construção civil (CNAE 41 a 43) é grau de risco 3 → 3%.** Não use o ponto médio da faixa: 2% subestima o custo em 1 ponto percentual da base do INSS |
+| RAT/SAT | 1%, 2% ou 3% por grau de risco do CNAE | **Sem valor assumido.** O script exige `--rat`. Construção civil (CNAE 41 a 43) costuma ser grau de risco 3, mas confirme o CNAE do estabelecimento — supor custa 1 ponto percentual da base do INSS por erro |
 | FAP | Multiplicador de 0,5 a 2,0 sobre o RAT | Publicado anualmente em janeiro pelo INSS/MTE, específico por CNPJ. Nunca suponha 1,0 sem confirmar |
 | Terceiros / Sistema S | ~5,8% (usual do FPAS 507) | SENAI, SESI, SESC, SENAC, SEBRAE, INCRA, salário-educação. Varia pelo FPAS do estabelecimento |
 
@@ -40,7 +40,7 @@ A desoneração substitui **apenas** a CPP. Continuam devidos integralmente:
 
 **Não calcula:** a provisão de rescisão (multa de 40% + aviso prévio + férias e 13º proporcionais), que depende da rotatividade real da empresa. Peça a taxa de rotatividade antes de estimar; não use percentual genérico.
 
-Os parâmetros `--rat`, `--fap` e `--terceiros` sobrescrevem os padrões. Sem eles, o script usa o padrão, marca na aba `Premissas` como **PREMISSA** e emite alerta de bloqueio contra usar o número em decisão de preço.
+`--rat`, `--fap` e `--terceiros` são **obrigatórios**: o script não tem valor default para nenhum dos três e recusa rodar sem eles. Os três dependem do CNAE, do FAP publicado e do FPAS do estabelecimento — qualquer valor assumido produz custo patronal errado com aparência de certo. A aba `Premissas` registra os três valores informados.
 
 ## Reforma Tributária não muda isso
 
