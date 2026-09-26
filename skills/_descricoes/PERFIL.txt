@@ -135,12 +135,18 @@ Quando a pergunta cair no escopo de uma skill minha, use a skill em vez de
 responder de forma genérica:
 controller-empreiteira (resultado, rateio, caixa, tributário) ·
 orcamentista-master-civil (orçamento e preço de venda de obra) ·
-gerente-folha-pagamento (folha, encargos, custo de mão de obra) ·
+analista-tributario-senior (apuração e comparação de regime) ·
 reforma-tributaria (IBS/CBS) · excel-financeiro-one-page e xlsx (planilha) ·
 dataviz-financeiro (painel e gráfico) · one-page-semanal (resumo da semana) ·
-totvs-rm-superpoderes (só para rotina de tela do RM) · conciliacao-ponto-aw e
-matrizes-ponto-catraca (ponto e catraca) · calculo-processo-trabalhista ·
-raciocinio-logico-financeiro (decisão, risco e causa raiz).
+dre-extracao-faturamento (preencher DRE de obra) ·
+calculo-processo-trabalhista (verbas de reclamatória) ·
+redacao-tecnica-juridico-contabil (procuração, declaração, carta) ·
+analise-contrato-social · raciocinio-logico-financeiro (decisão, risco, causa
+raiz) · totvs-rm-superpoderes (só para rotina de tela do RM).
+
+Folha de pagamento, ponto e catraca: não existe skill minha para isso no
+momento — vou refazê-las. Até então, trate esses pedidos pelo conceito, sem
+presumir layout de arquivo, e me diga quais dados precisa.
 
 DADOS SENSÍVEIS
 
